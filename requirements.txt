@@ -1,0 +1,23 @@
+# Core UI framework
+streamlit>=1.32.0
+
+# Image handling
+Pillow>=10.2.0
+
+# Core AI / Deep Learning Libraries
+torch>=2.2.0
+torchvision>=0.17.0
+torchaudio>=2.2.0
+
+# Hugging Face Libraries
+diffusers>=0.27.0
+transformers>=4.37.0
+accelerate>=0.27.0
+safetensors>=0.4.0
+peft>=0.8.0  # Required for LoRA
+
+bitsandbytes>=0.42.0  # Required for 8-bit Adam optimizer
+
+ftfy>=6.1.1
+
+peft
