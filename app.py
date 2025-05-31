@@ -710,17 +710,25 @@ def main():
         st.subheader("Generate New Jewelry Image")
         if selected_client and selected_product:
             if pipeline: # Check if pipeline (Base model, maybe + LoRA) is loaded
-                # --- Hardcoded parameters (NOT shown to user) ---
+                # --- Parameters ---
                 prompt = GENERIC_PROMPT # Use the consistent generic prompt
-                # Keeping a standard negative prompt is usually beneficial
                 neg_prompt = "low quality, blurry, text, watermark, signature, deformed, ugly, worst quality, lowres, jpeg artifacts, bad anatomy, extra limbs, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame"
-                num_images = 1       # Generate one image per click
                 guidance_scale = 7.5 # Default CFG scale
                 num_steps = 30       # Default steps
                 seed_value = -1      # Signal to use random seed in generate_images
 
-                # --- ONLY the Generate button is displayed ---
-                if st.button("Generate Image", type="primary", key="generate_button_minimal", use_container_width=True):
+                # --- User input for number of images ---
+                num_images_to_generate = st.number_input(
+                    "Number of Images to Generate",
+                    min_value=1,        # Minimum one image
+                    value=1,            # Default to one image
+                    step=1,             # Increment by 1
+                    key="num_images_generate_input",
+                    help="Enter the quantity of images you want to create in this batch. There is no upper limit."
+                )
+
+                # --- Generate button ---
+                if st.button("Generate Image(s)", type="primary", key="generate_button_ui", use_container_width=True):
                     # Define output path for generated images
                     output_gen_path = os.path.join(OUTPUTS_DIR, selected_client, selected_product)
                     # Call the generation function
@@ -728,7 +736,7 @@ def main():
                         pipeline=pipeline,
                         prompt=prompt,
                         negative_prompt=neg_prompt,
-                        num_images=num_images,
+                        num_images=num_images_to_generate, # Use the user-provided value
                         guidance_scale=guidance_scale,
                         num_steps=num_steps,
                         seed=seed_value,
@@ -736,15 +744,17 @@ def main():
                     )
                     if success:
                         st.balloons()
-                        st.success("Generation complete! Check the 'Generated Designs' tab (might need a moment to update).")
-                        # Optional: st.rerun() # To force immediate refresh of tab2, but loses logs/image in tab1
+                        # Updated success message
+                        if num_images_to_generate == 1:
+                            st.success("Generation complete! 1 image requested. Check the 'Generated Designs' tab.")
+                        else:
+                            st.success(f"Generation complete! {num_images_to_generate} images requested. Check the 'Generated Designs' tab.")
             else:
                 # If pipeline failed to load (e.g., base model missing)
                 st.error(f"Cannot generate images. The base model or LoRA for '{selected_product}' failed to load. Check sidebar messages and file paths.", icon="🚫")
                 st.info("Ensure the base model is downloaded and LoRA file (if needed) exists.")
         else:
             st.warning("Please select a Client and Product in the sidebar to enable generation.")
-
     # --- Generated Designs Tab (tab2) ---
     with tab2:
         st.subheader("View Generated Designs")
